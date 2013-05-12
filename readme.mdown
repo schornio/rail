@@ -1,0 +1,4 @@
+rail v0.1
+=========
+
+Lightweight web application framework for fast prototyping.

@@ -1,0 +1,20 @@
+{
+  "name": "rail",
+  "version": "0.1.0",
+  "description": "Lightweight web application framework for fast prototyping.",
+  "main": "rail.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/schornio/rail.git"
+  },
+  "author": "schornio",
+  "license": "BSD",
+  "dependencies" : { 
+    "mu2" : "https://github.com/schornio/Mu.git" 
+  }
+}
+
+
