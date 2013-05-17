@@ -141,6 +141,18 @@ json = (model) ->
 	this.response.write(if model then JSON.stringify(model) else '')
 	this.response.end()
 
+#--- Error handler ---
+
+Function::error = (errorHandler) ->
+	baseFunction = () ->
+		if arguments and arguments[0]
+			this.errorHandler(arguments)
+		else
+			functionArguments = Array::slice.call(arguments, 1)
+			this.function.apply(null, functionArguments)
+	return baseFunction.bind({ function: this, errorHandler: errorHandler })
+
+
 #--- Initialisation ---
 
 module.exports = (server) ->
