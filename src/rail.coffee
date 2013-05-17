@@ -17,13 +17,37 @@ constants =
 
 routingTable = {}
 
+createRoute = (route, method) ->
+	middlewareCallstack = []
+	addRoute.call({ middlewareCallstack: middlewareCallstack, routingTable: routingTable }, route, method)
+
+createMiddleware = (middleware) ->
+	middlewareCallstack = []
+	return addMiddleware.call({ middlewareCallstack: middlewareCallstack, routingTable: routingTable }, middleware)
+
 addRoute = (route, method) ->
-	routingTable[route] = method
+	this.middlewareCallstack.push(method)
+	this.routingTable[route] = this.middlewareCallstack
+
+addMiddleware = (middleware) ->
+	middlewareCallstack = this.middlewareCallstack
+
+	if not middlewareCallstack
+		middlewareCallstack = []
+
+	this.middlewareCallstack.push(middleware)
+
+	middlewareCallParameters = { middlewareCallstack: this.middlewareCallstack, routingTable: this.routingTable }
+	middlewareCallParameters.middleware = addMiddleware.bind(middlewareCallParameters)
+	middlewareCallParameters.route = addRoute.bind(middlewareCallParameters)
+
+	return middlewareCallParameters
+
 
 handleRequest = (request, response) ->
 	urlFragments = urlUtility.parse(request.url, true)
 
-	for route, method of routingTable
+	for route, routeParameters of routingTable
 		if urlFragments.pathname.match(route)
 
 			callParameters =
@@ -43,8 +67,13 @@ handleRequest = (request, response) ->
 				content: content.bind(callParameters)
 				json: json.bind(callParameters)
 
-			method.call(callParameters)
+			executeMiddleware = () ->
+				nextCall = this.middlewareCallstack[this.middlewareCallstackIndex]
+				this.middlewareCallstackIndex++;
+				nextCall = nextCall.bind(this.callParameters, executeMiddleware.bind(this))
+				process.nextTick(nextCall)
 
+			executeMiddleware.call({ middlewareCallstack: routeParameters, middlewareCallstackIndex: 0, callParameters: callParameters })
 			break
 
 #--- Utility ---
@@ -116,4 +145,4 @@ json = (model) ->
 
 module.exports = (server) ->
 	server.on('request', handleRequest)
-	return { route: addRoute, constants: constants }
+	return { route: createRoute, middleware: createMiddleware, constants: constants }
