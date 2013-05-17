@@ -13,7 +13,7 @@
   "author": "schornio",
   "license": "BSD",
   "dependencies" : { 
-    "mu2" : "https://github.com/schornio/Mu.git" 
+    "mu2" : "git+https://github.com/schornio/Mu.git#master",
   }
 }
 
